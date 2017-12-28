@@ -29,21 +29,27 @@ def file_create(f_name, Phi, m, n):
 
   elif type(Phi) is list:
       print "(Assumed) list of NP Phi arrays received"
+
       write_new_file(f_name, Phi[0], m, n)
 
       if len(Phi) <= 1:
           return
       else:
           for i in range(1, len(Phi)):
-            insert_array(f_name, Phi[i], i, m, n)
+              insert_array(f_name, Phi[i], i, m, n)
   else: 
       print "Received data doesn't match any compatible types! Exiting!"
       sys.exit(0)
 
-
+'''
 #function to write a completely new file, (or overwritting an old one), and inserting a new Phi (assuemd to be NP array type)
-def write_new_file(f_name, Phi, m, n):
-  file_name = f_name + '.h5'
+def write_new_Phi(f_name, Phi, m, n):
+  f_format = '.h5'
+  if f_name.endswith(f_format):
+      file_name = f_name
+  else:
+      file_name = f_name+ '.h5'
+  #file_name = f_name + '.h5'
   #f = tb.open_file('Phi.h5', 'w')
   f = tb.open_file(file_name, 'w')
   filters = tb.Filters(complevel=5, complib='blosc')
@@ -67,11 +73,55 @@ def write_new_file(f_name, Phi, m, n):
   print "Phi saving done, closing file..."
    
   f.close()
+'''
+#function to write a completely new file, (or overwritting an old one), and inserting a new Phi (assumed to be NP array type)
+def write_new_file(f_name, Phi, m, n):
+  f_format = '.h5'
+  if f_name.endswith(f_format):
+      file_name = f_name
+  else:
+      file_name = f_name+ '.h5'
+  #file_name = f_name + '.h5'
+  #f = tb.open_file('Phi.h5', 'w')
+  f = tb.open_file(file_name, 'w')
+  filters = tb.Filters(complevel=5, complib='blosc')
+
+  #because by default numpy (in other scripts) operates using float64, this is necessary
+  out = f.create_carray(f.root, 'data', tb.Float64Atom(), shape=(m, n), filters=filters) 
+
+  print "h5 file created, now putting Phi from memory to file..."
+    
+  step = 1000 #this is the number of rows we calculate each loop (example was using bl)
+  #this may not the most efficient value
+  #look into buffersize usage in PyTables and adopt the buffersite of the
+  #carray accordingly to improve specifically fetching performance
+   
+  #b = b.tocsc() #we slice b on columns, csc improves performance #not necessary in this case
+   
+  #this can also be changed to slice on rows instead of columns (which is what will be done for Phi)
+  #print np.shape(Phi)
+  if n > 1:
+
+      for i in range(0, n, step):
+          out[:,i:min(i+step, n)] = Phi[:, i:min(i+step, n)] # initially, example was using this => (a.dot(b[:,i:min(i+bl, l)])).toarray()
+
+  else:
+      for i in range(0, m, step):
+          out[i:min(i+step, m)] = Phi[i:min(i+step, m)]
+  print i
+  print "Phi saving done, closing file..."
+   
+  f.close()
 
 
 #function to INSERT a new array to a presumably ALREADY EXISTING file!
 def insert_array(f_name, array, idx, m, n):
-  file_name = f_name + '.h5'
+  f_format = '.h5'
+  if f_name.endswith(f_format):
+      file_name = f_name
+  else:
+      file_name = f_name+ '.h5'
+  #file_name = f_name + '.h5'
   #f = tb.open_file('Phi.h5', 'w')
   f = tb.open_file(file_name, 'a')
   filters = tb.Filters(complevel=5, complib='blosc')
@@ -91,9 +141,15 @@ def insert_array(f_name, array, idx, m, n):
   #b = b.tocsc() #we slice b on columns, csc improves performance #not necessary in this case
    
   #this can also be changed to slice on rows instead of columns (which is what will be done for Phi)
-  for i in range(0, n, step):
-    out[:,i:min(i+step, n)] = array[:, i:min(i+step, n)] # initially, example was using this => (a.dot(b[:,i:min(i+bl, l)])).toarray()
-    print i
+  if n > 1:
+
+      for i in range(0, n, step):
+          out[:,i:min(i+step, n)] = array[:, i:min(i+step, n)] # initially, example was using this => (a.dot(b[:,i:min(i+bl, l)])).toarray()
+
+  else:
+      for i in range(0, m, step):
+          out[i:min(i+step, m)] = array[i:min(i+step, m)]
+  print i
   print "Phi saving done, closing file..."
    
   f.close()
@@ -134,3 +190,31 @@ def take_node_data(file, counter):
         Phi = file.root.data[:]
     file.close()
     return ar_list
+
+def take_data(file_name):
+    file = tb.open_file(file_name, 'r')
+
+    #sanity check to determine type of Phi stored (whether it is a singular matrix or multiples of it)
+    counter = count_nodes(file)
+    print 'number of nodes in file:',counter
+    if counter > 1:
+        dt = [None] * counter
+        c = 0
+        for node in file:
+          if c!= 0:
+            n_index = node.name.lstrip('data_')
+
+            if n_index == '':
+              n_index = 0
+            else:
+              n_index = int(n_index)
+            dt[n_index] = node[:]
+          c+=1
+        m,n = np.shape(dt[0])
+
+    else:
+        dt = file.root.data[:]
+        m,n = np.shape(y_tested)
+
+    file.close()
+    return dt, m, n, counter

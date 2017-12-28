@@ -2,6 +2,7 @@ import sys
 import math
 import numpy as np
 import tables as tb
+import pandas as pd
 from mp_functions import *
 import threading
 
@@ -234,17 +235,23 @@ def Phi_learner_multi_x(Phi, y_mp):
 print_lock = threading.Lock()
 
 max_iter = None
-if len(sys.argv) == 4:
+if len(sys.argv) == 7:
     chosen_mp = sys.argv[1]
-    f_name = sys.argv[2]
-    sparsity = int(sys.argv[3])
-elif len(sys.argv) == 5:
+    y_file = sys.argv[2]
+    y_col = sys.argv[3]
+    Phi_file = sys.argv[4]
+    f_name = sys.argv[5]
+    sparsity = int(sys.argv[6])
+elif len(sys.argv) == 8:
     chosen_mp = sys.argv[1]
-    f_name = sys.argv[2]
-    sparsity = int(sys.argv[3])
-    max_iter = sys.argv[4]
+    y_file = sys.argv[2]
+    y_col = sys.argv[3]
+    Phi_file = sys.argv[4]
+    f_name = sys.argv[5]
+    sparsity = int(sys.argv[6])
+    max_iter = sys.argv[7]
 else:
-    print "Please give arguments with the form of:  [MP_to_use]  [output_file_name(wo/ '.h5' prefix)]  [#mp_sparsity]  [optional\ #max_iterations(used in the MP)]"
+    print "Please give arguments with the form of:  [MP_to_use] [y_file] [chosen_column] [Phi_file] [output_file] [#mp_sparsity]  [optional\ #max_iterations(used in the MP)]"
     sys.exit(0)
 
 mp_process = None
@@ -265,14 +272,30 @@ else:
 
 vbose = input("Verbose? ==> ")
 
+'''
 #take y from reading the .h5 file 
 y_file = tb.open_file("y_large.h5", 'r')
 y = y_file.root.data[:]
 y_file.close()
+'''
 
+#take y from csv file
+y_f = pd.read_csv(y_file)
+y = y_f[y_col].as_matrix()
+print type(y)
+
+y_start = input("Start_index? =>")
+y_end = y_start + 25600
+y = y[y_start:y_end]
+
+#rescale y to make original k-svd algo work properly again
+y = y*1
+
+#sys.exit(0)
 
 #take Phi from reading the other .h5 file as well.
-file = tb.open_file("Phi_small.h5", 'r')
+#file = tb.open_file("Phi_small.h5", 'r')
+file = tb.open_file(Phi_file, 'r')
 Phi = file.root.data[:]
 file.close()
 m, n = np.shape(Phi)
@@ -284,7 +307,7 @@ Phi_init = np.zeros(Phi.shape)
 
 Phi_init[:] = Phi[:]
 
-tol = 1e-4
+tol = 1e-10
 
 if np.shape(y)[0] <= 1000:
     Phi_learner(Phi, y)
