@@ -49,6 +49,34 @@ for i in y_tested:
 	print i 
 sys.exit(0)
 '''
+
+'''
+### TO BE USED LATER: #####
+# Below is a block used to ANIMATE a set of data tp create a graph that updates dynamically.
+# Should be able to be put to good use for showcasing the followig fft results.
+
+
+fig = plt.figure()
+ax1 = fig.add_subplot(1,1,1)
+count = 0
+step = 25600 
+y_data = y_file[col_choice].as_matrix()
+x_data = range(0, step)
+print np.shape(y_data[count*step:(count+1)*step])
+
+
+def animate(i):
+    global count
+    ax1.clear()
+    ax1.plot(x_data, y_data[count*step:(count+1)*step])
+    #ax1.plot(x_data,y_data[count*step:(count+1)*step])
+    count +=1
+
+ani = FuncAnimation(fig, animate, interval=1000)#frames=np.linspace(0, 2*np.pi, 128), init_func=init, blit=True)
+plt.show()
+sys.exit(0)
+''' 
+
 for i in range(0, repeats):
     #print y_tested[i]
 

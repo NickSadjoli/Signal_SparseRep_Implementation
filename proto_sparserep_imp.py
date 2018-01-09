@@ -98,15 +98,19 @@ def autolabel(rects, ax):
                 ha='center', va='bottom')
 
 
-if len(sys.argv) == 3:
+if len(sys.argv) == 7:
     col_choice= sys.argv[1]
     start_index = int(sys.argv[2])
+    Phi_file = sys.argv[3]
+    y_fl = sys.argv[4]
+    sparsity_chosen = int(sys.argv[5])
+    repeats = int(sys.argv[6])
 else:
-	print "Not matching arguments, please try again! (Args expected: [Column of choice in y] [start index for checking])"
+	print "Invalid, please try again! \n(Args expected: [Column of choice in y] [start index for checking] [Phi's file (\w .h5 subfix)] [y's file(\w .csv subfix)] [# sparsity used by the MP algo] [# repeats/testing to be done])"
 	sys.exit(0)
 
 
-repeats = 33
+#repeats = 33
 '''
 #take the dictionary from specified file
 file = tb.open_file("Phi_result_ori.h5", 'r')
@@ -137,7 +141,8 @@ else:
 
 file.close()
 '''
-Phi, m, n, counter = take_data("Phi_result_trained_test_5sps.h5")
+#Phi, m, n, counter = take_data("Phi_result_trained_test_5sps.h5")
+Phi, m, n, counter = take_data(Phi_file)
 print m,n
 
 '''
@@ -171,8 +176,7 @@ else:
 file.close()
 '''
 
-'''
-
+''' #if y is taken from HDF5 files instead.
 y_file = tb.open_file("y_large.h5", 'r')
 y = y_file.root.data[:]
 step = len(y)
@@ -181,7 +185,8 @@ y_file.close()
 print len(y)
 '''
 
-y_file = pd.read_csv("data.csv")
+#y_file = pd.read_csv("data.csv")
+y_file = pd.read_csv(y_fl)
 
 '''
 fig, ax = plt.subplots()
@@ -193,7 +198,7 @@ fig = plt.figure()
 ax1 = fig.add_subplot(1,1,1)
 count = 0
 step = 25600 
-y_data = y_file[col_choice]
+y_data = y_file[col_choice].as_matrix()
 x_data = range(0, step)
 print np.shape(y_data[count*step:(count+1)*step])
 
@@ -205,7 +210,7 @@ def animate(i):
 	#ax1.plot(x_data,y_data[count*step:(count+1)*step])
 	count +=1
 
-ani = FuncAnimation(fig, animate, interval=2000)#frames=np.linspace(0, 2*np.pi, 128), init_func=init, blit=True)
+ani = FuncAnimation(fig, animate, interval=1000)#frames=np.linspace(0, 2*np.pi, 128), init_func=init, blit=True)
 plt.show()
 sys.exit(0)
 '''
@@ -257,7 +262,8 @@ for i in range(0, repeats):
 	print y_cur[0]
 	#cur_s = ((i/step)+1)* 5
 	#cur_s = ((i/step)+1)* 1 #use this for the large Phi one, since this is gonna be done per thread
-	cur_s =  10
+	#cur_s =  10
+	cur_s  = sparsity_chosen
 	t0 = time.time()
 	#Phi_in = None
 	'''
