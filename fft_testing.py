@@ -134,7 +134,8 @@ for i in range(0, repeats):
     #idx = np.arange(np.shape(y_tst_fft)[0])
     #if i >= 10:
     
-    dex = np.arange(np.shape(y_tst_fft)[0])
+    #dex = np.arange(np.shape(y_tst_fft)[0])
+    dex = range(start_index + i*m, start_index + (i+1)*m)
 
     plt.figure(1)
     plt.plot(dex, y_data_smp, 'ro')
