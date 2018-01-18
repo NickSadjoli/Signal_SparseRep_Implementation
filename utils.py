@@ -214,7 +214,7 @@ def take_data(file_name):
 
     else:
         dt = file.root.data[:]
-        m,n = np.shape(y_tested)
+        m,n = np.shape(dt)
 
     file.close()
     return dt, m, n, counter
