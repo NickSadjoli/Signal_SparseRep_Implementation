@@ -60,14 +60,14 @@ def process_y(Phi, y, s_thread):
 
 
 #used to automatically place labels on the rectangular bar chart below
-def autolabel(rects, ax):
+def autolabel(rects, ax, zeroth_value):
     """
     Attach a text label above each bar displaying its height
     """
     for rect in rects:
         height = rect.get_height()
         ax.text(rect.get_x() + rect.get_width()/2., 1.05*height,
-                '%.2f' % height,
+                '%.2f' % (height+zeroth_value),
                 ha='center', va='bottom')
 
 
@@ -262,15 +262,17 @@ plt.show()
 '''
 
 #print RE, RMS and runtime relative to sparsity values
+#original raw version
 f, axgrid = plt.subplots(3)
 
 ind = np.arange(len(sparsity_list))
 width = 0.5
+
 rect0 = axgrid[0].bar(ind, error_list, color='r')
 axgrid[0].set_ylabel('RE values')
 axgrid[0].set_title('Recovery_Error of {} vs Sparsity'.format(chosen_mp))
 axgrid[0].set_xticks(ind+width/2)
-axgrid[0].set_xticklabels(tuple(sparsity_list))
+axgrid[0].set_xticklabels(tuple(ind))
 #axgrid[0].legend(error_list, ('RE for different sparsity values'))
 
 
@@ -278,21 +280,181 @@ rect1 = axgrid[1].bar(ind, rms_list, width, color='b')
 axgrid[1].set_ylabel('RMS_Values')
 axgrid[1].set_title('RMS for {} vs Sparsity'.format(chosen_mp))
 axgrid[1].set_xticks(ind+width/2)
-axgrid[1].set_xticklabels(tuple(sparsity_list)) #cannot directly take an array
+axgrid[1].set_xticklabels(tuple(ind)) #cannot directly take an array
 #axgrid[1].legend(rms_list, ('RMS values for each sparsity_values')) 	
 
 rect2 = axgrid[2].bar(ind, runtime_list, width, color='b')
 axgrid[2].set_ylabel('Runtimes (s)')
 axgrid[2].set_title('Runtimes for {} vs Sparsity'.format(chosen_mp))
 axgrid[2].set_xticks(ind+width/2)
-axgrid[2].set_xticklabels(tuple(sparsity_list)) #cannot directly take an array
+axgrid[2].set_xticklabels(tuple(ind)) #cannot directly take an array
 #axgrid[2].legend(runtime_list, ('Runtime values'))
 
 
-autolabel(rect0, axgrid[0])
-autolabel(rect1, axgrid[1])
-autolabel(rect2, axgrid[2])
+autolabel(rect0, axgrid[0],0)
+autolabel(rect1, axgrid[1],0)
+autolabel(rect2, axgrid[2],0)
+plt.show()
+###############
 
+#relative difference version
+
+f,axgrid = plt.subplots(3)
+ind = np.arange(len(sparsity_list))
+width = 0.5
+#err_relative = np.zeros(np.shape(error_list))
+err_relative = np.array(error_list)
+err_relative *= 1000
+err_relative = np.around(err_relative, decimals=2)
+err_rel_val = err_relative[0]
+err_relative -= err_rel_val
+
+y_tick_1 = np.arange(err_relative.min(), err_relative.max(), 5)
+y_tick_1_actual = y_tick_1 + err_rel_val
+
+#print y_tick_1, y_tick_1_actual
+rect0 = axgrid[0].bar(ind, err_relative, width, color='r')
+axgrid[0].set_ylabel('RE values (*1000)')
+#y_ticks = axgrid[0].get_yticks()
+#y_ticks_actual = y_ticks + err_rel_val
+#axgrid[0].set_yticklabels(y_ticks_actual)
+
+axgrid[0].set_yticks(y_tick_1)
+axgrid[0].set_yticklabels(tuple(y_tick_1_actual))
+
+axgrid[0].set_title('Recovery_Error of {} vs Sparsity (relative to training set)'.format(chosen_mp))
+axgrid[0].set_xticks(ind+width/2)
+axgrid[0].set_xticklabels(tuple(ind))
+#axgrid[0].legend(error_list, ('RE for different sparsity values'))
+
+rms_relative = np.array(rms_list)
+rms_relative *= 1000
+rms_relative = np.around(rms_relative, decimals=2)
+rms_rel_val = rms_relative[0]
+rms_relative -= rms_rel_val
+y_tick_2 = np.arange(rms_relative.min(), rms_relative.max(), 0.05)
+y_tick_2_actual = y_tick_2 + rms_rel_val
+#print y_tick_1, rms_relative
+rect1 = axgrid[1].bar(ind, rms_relative, width, color='b')
+axgrid[1].set_ylabel('RMS_Values (*1000)')
+#y_ticks = axgrid[1].get_yticks()
+#y_ticks_actual = y_ticks + err_rel_val
+#axgrid[1].set_yticklabels(y_ticks_actual)
+
+axgrid[1].set_yticks(y_tick_2)
+axgrid[1].set_yticklabels(tuple(y_tick_2_actual))
+
+axgrid[1].set_title('RMS for {} vs Sparsity (relative to training set)'.format(chosen_mp))
+axgrid[1].set_xticks(ind+width/2)
+axgrid[1].set_xticklabels(tuple(ind)) #cannot directly take an array
+#axgrid[1].legend(rms_list, ('RMS values for each sparsity_values')) 	
+
+runtime_relative = np.array(runtime_list)
+runtime_relative *= 10
+runtime_relative = np.around(runtime_relative, decimals=2)
+runtime_rel_val = runtime_relative[0]
+runtime_relative -= runtime_rel_val
+y_tick_3 = np.arange(runtime_relative.min(), runtime_relative.max(), 0.05)
+y_tick_3_actual = y_tick_3 + runtime_rel_val
+rect2 = axgrid[2].bar(ind, runtime_relative, width, color='b')
+axgrid[2].set_ylabel('Runtimes (*10 s)')
+#y_ticks = axgrid[2].get_yticks()
+#y_ticks_actual = y_ticks + err_rel_val
+#axgrid[2].set_yticklabels(y_ticks_actual)
+
+axgrid[2].set_yticks(y_tick_3)
+axgrid[2].set_yticklabels(tuple(y_tick_3_actual))
+
+axgrid[2].set_title('Runtimes for {} vs Sparsity (relative to training set)'.format(chosen_mp))
+axgrid[2].set_xticks(ind+width/2)
+axgrid[2].set_xticklabels(tuple(ind)) #cannot directly take an array
+#axgrid[2].legend(runtime_list, ('Runtime values'))
+
+autolabel(rect0, axgrid[0], err_rel_val)
+autolabel(rect1, axgrid[1], rms_rel_val)
+autolabel(rect2, axgrid[2], runtime_rel_val)
+
+plt.show()
+######################
+
+#percentage version
+
+f,axgrid = plt.subplots(3)
+ind = np.arange(len(sparsity_list))
+width = 0.5
+#err_relative = np.zeros(np.shape(error_list))
+err_relative = np.array(error_list)
+err_relative = err_relative / err_relative[0]
+err_relative = np.around(err_relative, decimals=2)
+err_rel_val = err_relative[0]
+err_relative -= err_rel_val
+
+y_tick_1 = np.arange(err_relative.min(), err_relative.max(), 0.03)
+y_tick_1_actual = y_tick_1 + err_rel_val# err_rel_val
+
+
+#print y_tick_1, y_tick_1_actual
+rect0 = axgrid[0].bar(ind, err_relative, width, color='r')
+axgrid[0].set_ylabel('RE values (% vs training)')
+#y_ticks = axgrid[0].get_yticks()
+#y_ticks_actual = y_ticks + err_rel_val
+#axgrid[0].set_yticklabels(y_ticks_actual)
+
+axgrid[0].set_yticks(y_tick_1)
+axgrid[0].set_yticklabels(tuple(y_tick_1_actual))
+
+
+axgrid[0].set_title('Recovery_Error of {} vs Sparsity (relative to training set)'.format(chosen_mp))
+axgrid[0].set_xticks(ind+width/2)
+axgrid[0].set_xticklabels(tuple(ind))
+#axgrid[0].legend(error_list, ('RE for different sparsity values'))
+
+rms_relative = np.array(rms_list)
+rms_relative *= 1000
+rms_relative = np.around(rms_relative, decimals=2)
+rms_rel_val = rms_relative[0]
+rms_relative -= rms_rel_val
+y_tick_2 = np.arange(rms_relative.min(), rms_relative.max(), 0.05)
+y_tick_2_actual = y_tick_2 + rms_rel_val
+#print y_tick_1, rms_relative
+rect1 = axgrid[1].bar(ind, rms_relative, width, color='b')
+axgrid[1].set_ylabel('RMS_Values (*1000)')
+#y_ticks = axgrid[1].get_yticks()
+#y_ticks_actual = y_ticks + err_rel_val
+#axgrid[1].set_yticklabels(y_ticks_actual)
+
+axgrid[1].set_yticks(y_tick_2)
+axgrid[1].set_yticklabels(tuple(y_tick_2_actual))
+
+axgrid[1].set_title('RMS for {} vs Sparsity (relative to training set)'.format(chosen_mp))
+axgrid[1].set_xticks(ind+width/2)
+axgrid[1].set_xticklabels(tuple(ind)) #cannot directly take an array
+#axgrid[1].legend(rms_list, ('RMS values for each sparsity_values')) 	
+
+runtime_relative = np.array(runtime_list)
+runtime_relative *= 10
+runtime_relative = np.around(runtime_relative, decimals=2)
+runtime_rel_val = runtime_relative[0]
+runtime_relative -= runtime_rel_val
+y_tick_3 = np.arange(runtime_relative.min(), runtime_relative.max(), 0.05)
+y_tick_3_actual = y_tick_3 + runtime_rel_val
+rect2 = axgrid[2].bar(ind, runtime_relative, width, color='b')
+axgrid[2].set_ylabel('Runtimes (*10 s)')
+#y_ticks = axgrid[2].get_yticks()
+#y_ticks_actual = y_ticks + err_rel_val
+#axgrid[2].set_yticklabels(y_ticks_actual)
+
+axgrid[2].set_yticks(y_tick_3)
+axgrid[2].set_yticklabels(tuple(y_tick_3_actual))
+
+axgrid[2].set_title('Runtimes for {} vs Sparsity (relative to training set)'.format(chosen_mp))
+axgrid[2].set_xticks(ind+width/2)
+axgrid[2].set_xticklabels(tuple(ind)) #cannot directly take an array
+#axgrid[2].legend(runtime_list, ('Runtime values'))
+
+autolabel(rect0, axgrid[0], err_rel_val)
+autolabel(rect1, axgrid[1], rms_rel_val)
+autolabel(rect2, axgrid[2], runtime_rel_val)
 
 plt.show()
 

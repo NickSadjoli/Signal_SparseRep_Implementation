@@ -307,14 +307,16 @@ def Phi_designer_k_svd(Phi_list, y_list, index=None):
     with print_lock:
         print threading.current_thread().name, ":", np.shape(y), np.shape(Phi)
     '''
-    for i in range(0,1000):
+    x_mp = np.zeros((n,k))
+    for i in range(0,50):
         Phi_old = np.zeros(Phi.shape)
         Phi_old[:, :] = Phi[:, :]
-        x_mp = np.zeros((n,k))
+        #x_mp = np.zeros((n,k))
         #print_sizes(x_mp[:,0], y_cur[:,0])
         #print Phi
 
         #for every column of x_mp, calculate the sparse representation of the column
+        #(find the representation of x_mp that would give minimum solution for ||y - Phi*x_mp||)
         for j in range(0, k): 
             # find approximation of x signal
             if chosen_mp == "omp-scikit":
@@ -339,6 +341,7 @@ def Phi_designer_k_svd(Phi_list, y_list, index=None):
         '''
         
         #for every t-th atom in Phi...
+        #update the dictionary atoms so that it minimizes errors obtained from compressed x_mp
         for t in range(0, n):
             #pick the t-th column from Phi
             #atom = Phi[:,t]
@@ -384,25 +387,29 @@ def Phi_designer_k_svd(Phi_list, y_list, index=None):
             '''
             x_mp[t, I] = s[0] * V[:,0]
 
-
+        '''
         previous_norm = l2_norm(Phi_old)
         detected_norm = l2_norm(Phi)
 
         #print previous_norm, detected_norm  
 
         norm_diff = previous_norm - detected_norm
+        '''
+        E = np.linalg.norm(y_cur - np.dot(Phi, x_mp))
 
         #if l2_norm(Phi - Phi_old) < tol:
-        if abs(norm_diff) < tol:
+        #if abs(norm_diff) < tol:
+        if E < tol:
             with print_lock:
-                print threading.current_thread().name, ":" , abs(norm_diff), "converged"
+                #print threading.current_thread().name, ":" , abs(norm_diff), "converged"
+                print threading.current_thread().name, "-", E, "Converged..."
 
             break
             #return Phi
 
         with print_lock:
-            print threading.current_thread().name, ": Updated for ->", i, "-th iteration. Current norm =", abs(norm_diff), l2_norm(Phi-Phi_old)
-
+            #print threading.current_thread().name, ": Updated for ->", i, "-th iteration. Current norm =", abs(norm_diff), l2_norm(Phi-Phi_old)
+            print threading.current_thread().name, " - Updated for ->", i, "-th iteration. Current error is = ", E, l2_norm(Phi-Phi_old)
     if index is None:
         return
     else:
@@ -482,7 +489,8 @@ k = training_sets
 
 Phi_all = None
 
-tol = 1e-10
+#tol = 1e-10
+tol = 10
 
 if np.shape(y)[0] <= 1000 and training_sets == 1 :
     Phi_learner(Phi, y)

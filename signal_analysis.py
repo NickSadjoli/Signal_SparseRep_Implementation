@@ -14,6 +14,7 @@ from matplotlib.animation import FuncAnimation
 from mp_functions import *
 from utils import *
 from scipy.fftpack import fft, fftfreq, fftshift
+from scipy import signal
 
 
 if len(sys.argv) == 3:
@@ -26,8 +27,9 @@ else:
 
 
 fig = plt.figure()
-ax1 = fig.add_subplot(2,1,1)
-ax2 = fig.add_subplot(2,1,2)
+ax1 = fig.add_subplot(3,1,1)
+ax2 = fig.add_subplot(3,1,2)
+ax3 = fig.add_subplot(3,1,3)
 count = 0
 step = 25600 
 y_file = pd.read_csv(y_fl)
@@ -74,6 +76,11 @@ def animate(i):
     ax2.plot(idx, 1.0/N * np.abs(yt))
     #ax2.plot(idx, 2.0/N * yt[0:N/2])
     #ax1.plot(x_data,y_data[count*step:(count+1)*step])
+   
+    f, Psd = signal.periodogram(y_data_slice, len(y_data_slice))
+
+    ax3.clear()
+    ax3.semilogy(f,Psd)
     count +=1
 
 ani = FuncAnimation(fig, animate, interval=2000)#frames=np.linspace(0, 2*np.pi, 128), init_func=init, blit=True)

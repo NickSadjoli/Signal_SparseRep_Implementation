@@ -215,6 +215,7 @@ plt.show()
 sys.exit(0)
 '''
 
+
 y_data = y_file[col_choice].as_matrix()
 print type(y_data)
 step = m * counter
@@ -281,7 +282,7 @@ for i in range(0, repeats):
 	sparsity_list.append(sparsity)
 	runtime_list.append(mp_time)
 	tf = time.time()
-	print "total time: " + str(tf-t0) + ' ' + str(cur_s)
+	print "total time: " + str(tf-t0) + ' ' + str(cur_s), np.count_nonzero(x_test)
 	print "" 
 
 x_testing = x_list[0] #used for looking at the non-zero elements of

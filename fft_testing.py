@@ -6,6 +6,9 @@ from scipy.fftpack import fft, fftfreq, fftshift
 
 from utils import *
 
+from bokeh.plotting import figure, show, output_file
+from bokeh.layouts import column
+
 #used to automatically place labels on the rectangular bar chart below
 def autolabel(rects, ax):
     """
@@ -43,6 +46,11 @@ y_tested, m, n, _ = take_data(y_test_file)
 
 y_file = pd.read_csv(y_file_ori)
 y_data = y_file[col_choice]
+
+#FILE = "/Users/catoro/Code/VibrationAnalysis/Datasets/29_02_2016 3_34_58_ pm.txt"
+tittle_pic = "Recovery from Sparse Representation"
+tittle_pic2 = "FFT model"
+TOOLS = "pan,wheel_zoom,box_zoom,reset,save"
 #print_sizes(y_tested[0], y_data[0:m])
 '''
 for i in y_tested:
@@ -135,10 +143,32 @@ for i in range(0, repeats):
     #if i >= 10:
     
     #dex = np.arange(np.shape(y_tst_fft)[0])
-    dex = range(start_index + i*m, start_index + (i+1)*m)
 
+    # tck = interpolate.splrep(x, y, k=spline_degree)
+    dex = range(start_index + i*m, start_index + (i+1)*m)
+    '''
+    xnew = np.linspace(x.min(), x.max(), pts_spline_approx)
+    ynew = interpolate.splev(xnew, tck, der=0)
+
+
+    fft_y = np.abs(rfft(y))
+    fft_ynew = np.abs(rfft(ynew))
+    '''
+    output_file("legend.html", title="legend.py example")
+    p1 = figure(title=tittle_pic, tools=TOOLS, plot_width=1200, plot_height=400)
+    p2 = figure(title=tittle_pic2, tools=TOOLS, plot_width=1200, plot_height=400)
+
+    p1.circle(dex, y_data_smp, legend="Control points", color="red", alpha=0.5)
+    p1.line(dex, y_tst, legend="interpolation", color="blue", alpha=0.8)
+
+    p2.line(idx, 1.0/N * np.abs(y2), legend="Control points", color="red", alpha=0.5)
+    p2.line(idx, 1.0/N * np.abs(y1), legend="interpolation", color="blue", alpha=0.8)
+
+    show(column(p1, p2))
+
+    '''
     plt.figure(1)
-    plt.plot(dex, y_data_smp, 'ro')
+    plt.plot(dex, y_data_smp, 'r-')
     plt.plot(dex, y_tst, 'g-')
     plt.ylabel('Original vs tested')
     plt.xlabel('data points')
@@ -152,7 +182,7 @@ for i in range(0, repeats):
     plt.xlabel('Frequency')
     plt.show()
 
-
+    '''
 
 
 

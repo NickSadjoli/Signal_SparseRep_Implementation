@@ -16,8 +16,8 @@ def Recovery_Error(original_signal, test_signal):
     return (l2_norm(original_signal - test_signal)/l2_norm(original_signal))
 
 def RMS(original_signal, test_signal):
-  return math.sqrt(mean_squared_error(original_signal,test_signal))
-  #return mean_squared_error(original_signal, test_signal)
+  #return math.sqrt(mean_squared_error(original_signal,test_signal))
+  return mean_squared_error(original_signal, test_signal)
 
 
 #function to create a new file to insert Phi, split into 2 types based on type of Phi received
@@ -76,6 +76,7 @@ def write_new_Phi(f_name, Phi, m, n):
 '''
 #function to write a completely new file, (or overwritting an old one), and inserting a new Phi (assumed to be NP array type)
 def write_new_file(f_name, Phi, m, n):
+  print type(Phi[0][0])
   f_format = '.h5'
   if f_name.endswith(f_format):
       file_name = f_name
