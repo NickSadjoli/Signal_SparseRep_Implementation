@@ -105,6 +105,7 @@ print Phi
 #m,n = np.shape(Phi)
 #print m, n, len(Phi)
 m, n = np.shape(Phi)
+print m,n
 '''
 for x in Phi:
     print x

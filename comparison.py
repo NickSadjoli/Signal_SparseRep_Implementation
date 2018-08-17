@@ -10,9 +10,11 @@ from bokeh.layouts import column
 TOOLS = "pan,wheel_zoom,box_zoom,reset,save"
 
 y_original, _, _, _ = take_data("test_data.h5")
-Phi_spscode, _, _, _  = take_data("Phi_result_nelksvd_spindle_xidle_1-5.h5")
+#Phi_spscode, _, _, _  = take_data("Phi_result_nelksvd_spindle_xidle_1-5.h5")
+Phi_spscode, _, _, _  = take_data("Phi_result_demo.h5")
 
-spscode_runtime, _, _, _ = take_data("sparse_code1-5/sps_code_runtime.h5")
+#spscode_runtime, _, _, _ = take_data("sparse_code1-5/sps_code_runtime.h5")
+spscode_runtime, _, _, _ = take_data("sparse_code_demo/sps_code_runtime.h5")
 dct_runtime, _, _, _ = take_data("dct/dct_runtime.h5")
 dwt_runtime, _, _, _ = take_data("dwt/dwt_runtime.h5")
 #print np.shape(y_original), np.shape(Phi_spscode), np.shape(spscode_runtime), np.shape(dct_runtime)
@@ -28,7 +30,8 @@ dwt_rms_list = []
 
 for i in range(0,40):
     y_ori = y_original[i*step:(i+1)*step]
-    spscode_x, _, _, _  = take_data("sparse_code1-5/sps_code"+str(i)+".h5")
+    #spscode_x, _, _, _  = take_data("sparse_code1-5/sps_code"+str(i)+".h5")
+    spscode_x, _, _, _  = take_data("sparse_code_demo/sps_code"+str(i)+".h5")
     #print np.shape(Phi_spscode.T), np.shape(spscode_x)
     spscode_test = np.dot(Phi_spscode.T, spscode_x)
     spscode_test = np.reshape(spscode_test, (len(y_ori), 1))

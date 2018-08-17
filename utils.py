@@ -22,7 +22,7 @@ def RMS(original_signal, test_signal):
 
 #function to create a new file to insert Phi, split into 2 types based on type of Phi received
 def file_create(f_name, Phi, m, n):
-
+  print type(Phi)
   if type(Phi) is np.ndarray:
       print "One numpy Phi array received"
       write_new_file(f_name, Phi, m, n)
@@ -30,7 +30,7 @@ def file_create(f_name, Phi, m, n):
   elif type(Phi) is list:
       print "(Assumed) list of NP Phi arrays received"
 
-      write_new_file(f_name, Phi[0], m, n)
+      write_new_file(f_name, Phi[0], m, 1)
 
       if len(Phi) <= 1:
           return
